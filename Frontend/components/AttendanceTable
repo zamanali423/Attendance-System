@@ -1,0 +1,183 @@
+import React, { useContext, useState } from "react";
+import { userContext } from "../context/userContext.js/userContext";
+
+const AttendanceTable = () => {
+  const [attendance, setAttendance] = useState("");
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [request, setrequest] = useState("");
+  const [showForm, setshowForm] = useState(false);
+  const { loginData } = useContext(userContext);
+  const [disAble, setdisAble] = useState(0);
+
+  const handlePresent = async () => {
+    var fName = loginData.user.fullName;
+    var em = loginData.user.email;
+    try {
+      const response = await fetch("http://localhost:3001/Attendance/Student", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: new Date().toLocaleDateString("de-DE"),
+          status: "P",
+          fullName: fName,
+          email: em,
+        }), // Adjust fullName and email accordingly
+      });
+      const mark = await response.json();
+      console.log(mark);
+      setAttendance("P");
+      setdisAble(1);
+    } catch (error) {
+      console.error("Error marking attendance:", error);
+    }
+  };
+
+  const handleLeave = async () => {
+    var fName = loginData.user.fullName;
+    var em = loginData.user.email;
+    try {
+      const response = await fetch("http://localhost:3001/Attendance/Student", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: new Date().toLocaleDateString("de-DE"),
+          status: "A",
+          fullName: fName,
+          email: em,
+        }), // Adjust fullName and email accordingly
+      });
+      const mark = await response.json();
+      console.log(mark);
+      setAttendance("A");
+      setdisAble(1);
+    } catch (error) {
+      console.error("Error marking leave:", error);
+    }
+  };
+
+  const showAttendance = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/Student");
+      const records = await response.json();
+      setAttendanceRecords(records);
+    } catch (error) {
+      console.error("Error fetching attendance records:", error);
+    }
+  };
+
+  const handleLeaveRequest = async () => {
+    var em = loginData.user.email;
+    var fName = loginData.user.fullName;
+    try {
+      const response = await fetch(
+        "http://localhost:3001/Attendance/Student/request",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            date: new Date().toLocaleDateString("de-DE"),
+            fullName: fName,
+            email: em,
+            request,
+          }),
+        }
+      );
+      const mark = await response.json();
+      setshowForm(false);
+      setrequest("");
+      setdisAble(1);
+      console.log(mark);
+    } catch (error) {
+      console.error("Error marking leave:", error);
+    }
+  };
+
+  const showLeaveRequest = () => {
+    setshowForm(true);
+  };
+  const submitRequest = (e) => {
+    setrequest(e.target.value);
+  };
+
+  return (
+    <div className="container mt-4">
+      <button
+        className="btn btn-primary"
+        onClick={handlePresent}
+        disabled={disAble === 1}
+      >
+        Mark Attendance
+      </button>
+      <button
+        className="btn btn-primary mx-2"
+        onClick={handleLeave}
+        disabled={disAble === 1}
+      >
+        Mark Leave
+      </button>
+      <button className="btn btn-primary" onClick={showAttendance}>
+        View Attendance
+      </button>
+      <button
+        className="btn btn-primary mx-2"
+        onClick={showLeaveRequest}
+        disabled={disAble === 1}
+      >
+        Leave Request
+      </button>
+      {showForm ? (
+        <div className="form-floating mt-3">
+          <textarea
+            className="form-control"
+            placeholder="Leave a comment here"
+            id="floatingTextarea2"
+            style={{ height: "100px" }}
+            name="request"
+            value={request}
+            onChange={submitRequest}
+          ></textarea>
+          <label for="floatingTextarea2">Write your request</label>
+          <button className="btn btn-primary mt-3" onClick={handleLeaveRequest}>
+            Send
+          </button>
+          <button
+            className="btn btn-primary mt-3 ms-2"
+            onClick={() => setshowForm(false)}
+          >
+            Cancel
+          </button>
+        </div>
+      ) : null}
+      <div className="mt-4">
+        {attendanceRecords.length > 0 && (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {attendanceRecords.map((record, index) => (
+                <tr key={index}>
+                  <td>{record.date}</td>
+                  <td>{record.fullName}</td>
+                  <td>{record.status || "Leave"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AttendanceTable;
