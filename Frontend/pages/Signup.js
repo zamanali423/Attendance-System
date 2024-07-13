@@ -25,7 +25,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const fetchData = await fetch("http://localhost:3001/register/newUser", {
+      const fetchData = await fetch("https://attendance-system-pied-seven.vercel.app/register/newUser", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
