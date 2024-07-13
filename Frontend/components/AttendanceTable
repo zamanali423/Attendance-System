@@ -1,17 +1,21 @@
-import React, { useContext, useState } from "react";
-import { userContext } from "../context/userContext.js/userContext";
+import React, { useContext, useEffect, useState } from "react";
+import { userContext } from "../context/userContext/userContext";
 
 const AttendanceTable = () => {
   const [attendance, setAttendance] = useState("");
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [request, setrequest] = useState("");
   const [showForm, setshowForm] = useState(false);
-  const { loginData } = useContext(userContext);
-  const [disAble, setdisAble] = useState(0);
+  const { user } = useContext(userContext);
+  const [disAble, setdisAble] = useState(new Date().toISOString().slice(0, 10));
+  const [disAble1, setdisAble1] = useState(0);
+  const [date, setdate] = useState(new Date());
+  console.log("diable", disAble);
+  console.log("date", date.toISOString().slice(0, 10));
 
   const handlePresent = async () => {
-    var fName = loginData.user.fullName;
-    var em = loginData.user.email;
+    var fName = user.fullName;
+    var em = user.email;
     try {
       const response = await fetch("http://localhost:3001/Attendance/Student", {
         method: "POST",
@@ -19,24 +23,24 @@ const AttendanceTable = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          date: new Date().toLocaleDateString("de-DE"),
+          date: new Date(),
           status: "P",
           fullName: fName,
           email: em,
         }), // Adjust fullName and email accordingly
       });
       const mark = await response.json();
-      console.log(mark);
       setAttendance("P");
-      setdisAble(1);
+      setdisAble1(1);
+      console.log("mark", mark);
     } catch (error) {
       console.error("Error marking attendance:", error);
     }
   };
 
   const handleLeave = async () => {
-    var fName = loginData.user.fullName;
-    var em = loginData.user.email;
+    var fName = user.fullName;
+    var em = user.email;
     try {
       const response = await fetch("http://localhost:3001/Attendance/Student", {
         method: "POST",
@@ -44,24 +48,24 @@ const AttendanceTable = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          date: new Date().toLocaleDateString("de-DE"),
+          date: new Date(),
           status: "A",
           fullName: fName,
           email: em,
         }), // Adjust fullName and email accordingly
       });
       const mark = await response.json();
-      console.log(mark);
       setAttendance("A");
-      setdisAble(1);
+      setdisAble1(1);
     } catch (error) {
       console.error("Error marking leave:", error);
     }
   };
 
   const showAttendance = async () => {
+    var em = user.email;
     try {
-      const response = await fetch("http://localhost:3001/Student");
+      const response = await fetch(`http://localhost:3001/Student/${em}`);
       const records = await response.json();
       setAttendanceRecords(records);
     } catch (error) {
@@ -70,8 +74,8 @@ const AttendanceTable = () => {
   };
 
   const handleLeaveRequest = async () => {
-    var em = loginData.user.email;
-    var fName = loginData.user.fullName;
+    var em = user.email;
+    var fName = user.fullName;
     try {
       const response = await fetch(
         "http://localhost:3001/Attendance/Student/request",
@@ -81,7 +85,7 @@ const AttendanceTable = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            date: new Date().toLocaleDateString("de-DE"),
+            date: new Date(),
             fullName: fName,
             email: em,
             request,
@@ -91,7 +95,7 @@ const AttendanceTable = () => {
       const mark = await response.json();
       setshowForm(false);
       setrequest("");
-      setdisAble(1);
+      setdisAble1(1);
       console.log(mark);
     } catch (error) {
       console.error("Error marking leave:", error);
@@ -105,19 +109,38 @@ const AttendanceTable = () => {
     setrequest(e.target.value);
   };
 
+  //! get date
+  useEffect(() => {
+    const getDate = async () => {
+      var em = user.email;
+      try {
+        const response = await fetch(`http://localhost:3001/Student/${em}`);
+        const records = await response.json();
+        if (records.length > 0) {
+          const latestRecord = records[records.length - 1];
+          console.log("latest record", latestRecord);
+          setdate(new Date(latestRecord.date));
+        }
+      } catch (error) {
+        console.error("Error fetching attendance records:", error);
+      }
+    };
+    getDate();
+  }, [user.email]);
+
   return (
     <div className="container mt-4">
       <button
         className="btn btn-primary"
         onClick={handlePresent}
-        disabled={disAble === 1}
+        disabled={disAble === date.toISOString().slice(0, 10) || disAble1 === 1}
       >
         Mark Attendance
       </button>
       <button
         className="btn btn-primary mx-2"
         onClick={handleLeave}
-        disabled={disAble === 1}
+        disabled={disAble === date.toISOString().slice(0, 10) || disAble1 === 1}
       >
         Mark Leave
       </button>
@@ -127,7 +150,7 @@ const AttendanceTable = () => {
       <button
         className="btn btn-primary mx-2"
         onClick={showLeaveRequest}
-        disabled={disAble === 1}
+        disabled={disAble === date.toISOString().slice(0, 10) || disAble1 === 1}
       >
         Leave Request
       </button>
@@ -167,9 +190,9 @@ const AttendanceTable = () => {
             <tbody>
               {attendanceRecords.map((record, index) => (
                 <tr key={index}>
-                  <td>{record.date}</td>
+                  <td>{new Date(record.date).toISOString().slice(0, 10)}</td>
                   <td>{record.fullName}</td>
-                  <td>{record.status || "Leave"}</td>
+                  <td>{record.status ? record.status : "Pending"}</td>
                 </tr>
               ))}
             </tbody>
