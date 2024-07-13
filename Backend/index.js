@@ -5,21 +5,23 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const port = process.env.PORT;
 const app = express();
-const userRouter=require("./router/userRouter/userRouter")
+const userRouter = require("./router/userRouter/userRouter");
+const adminRouter = require("./router/userRouter/adminPanel");
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use("/",userRouter)
+app.use("/", userRouter);
+app.use("/admin", adminRouter);
 
 //! Database Connection
 mongoose
-  .connect(process.env.URI)
+  .connect(process.env.URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log("Connect Database Successfuly");
     app.listen(port, () => {
-        console.log(`Server running on port: ${port}`);
-      });
+      console.log(`Server running on port: ${port}`);
+    });
   })
   .catch((error) => {
     console.log(error);
