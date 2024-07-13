@@ -11,7 +11,7 @@ const {
   userLoginSchema,
 } = require("../../validation/usersValidation/userValidation");
 
-router.get("/register", (req, res) => {
+router.get("/", (req, res) => {
   res.send("user data here");
 });
 
