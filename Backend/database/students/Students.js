@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 const studentSchema = new mongoose.Schema({
   date: {
-    type: String,
+    type: Date,
+    required: true,
   },
   status: {
     type: String,
