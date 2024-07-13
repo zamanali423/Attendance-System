@@ -26,7 +26,30 @@ const userSchema = new mongoose.Schema({
   profilePicture: {
     type: String,
   },
+  tokens: [
+    {
+      token: {
+        type: String,
+      },
+    },
+  ],
 });
+
+// userSchema.methods.generateToken = async function () {
+//   try {
+//     const secretKey = process.env.SECRET_KEY;
+//     const token = await jwt.sign(
+//       { _id: this._id, email: this.email },
+//       secretKey,
+//       { expiresIn: "30d" }
+//     );
+//     this.tokens = this.tokens.concat({ token });
+//     await this.save();
+//     return token;
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
 // userSchema.pre("save", async function (next) {
 //   if (this.isModified("password") || this.isModified("confirm")) {
