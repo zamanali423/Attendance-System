@@ -55,6 +55,7 @@
 .menu-items{
     order: 2;
     display: flex;
+    align-items: self-end;
 }
 .logo{
     order: 1;
@@ -386,5 +387,221 @@
     text-decoration: underline;
   }
 
-  /* attendance table  */
+  .logout{
+    cursor: pointer;
+    color: #4d4949;
+    font-weight: 500;
+  }
 
+
+  /* table css */
+
+  table {
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    table-layout: fixed;
+    caption-side: top !important
+  }
+  
+  table caption {
+    font-size: 1.5em;
+    margin: .5em 0 .75em;
+    text-align: center;
+  }
+  
+  table tr {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    padding: .35em;
+  }
+  
+  table th,
+  table td {
+    padding: .625em;
+    text-align: center;
+  }
+  
+  table th {
+    font-size: .85em;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  
+  @media screen and (max-width: 600px) {
+    table {
+      border: 0;
+    }
+  
+    table caption {
+      font-size: 1.3em;
+    }
+    
+    table thead {
+      border: none;
+      clip: rect(0 0 0 0);
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute;
+      width: 1px;
+    }
+    
+    table tr {
+      border-bottom: 3px solid #ddd;
+      display: block;
+      margin-bottom: .625em;
+    }
+    
+    table td {
+      border-bottom: 1px solid #ddd;
+      display: block;
+      font-size: .8em;
+      text-align: right;
+    }
+    
+    table td::before {
+      /*
+      * aria-label has no advantage, it won't be read inside a table
+      content: attr(aria-label);
+      */
+      content: attr(data-label);
+      float: left;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    table td:last-child {
+      border-bottom: 0;
+    }
+  }
+  
+  /* general styling */
+  body {
+    font-family: "Open Sans", sans-serif;
+    line-height: 1.25;
+  }
+
+  .edit{
+    cursor: pointer;
+  }
+
+
+
+  /* avatar  */
+
+/* Avatar Container */
+.avatar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Avatar Styles */
+.avatar {
+  width: 100%;
+  max-width: 50px; /* You can adjust this value as needed */
+  height: auto;
+  border-radius: 50%;
+  border: 2px solid #ddd; /* Optional: add a border around the avatar */
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .avatar {
+    max-width: 100px; /* Smaller size for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .avatar {
+    max-width: 75px; /* Even smaller size for very small screens */
+  }
+}
+
+  
+/* generate report */
+
+/* Container styling */
+.main {
+  max-width: 800px;
+  margin: auto;
+  padding: 0 20px;
+}
+
+/* Form styling */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.from,
+.to {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-weight: bold;
+}
+
+.input[type="date"] {
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button.submit, button.download {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button.submit:hover, button.download:hover {
+  background-color: #0056b3;
+}
+
+/* Report table styling */
+.reportMain {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+thead {
+  background-color: #f8f8f8;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .from, .to {
+    flex-direction: column;
+  }
+
+  .label {
+    margin-bottom: 5px;
+  }
+
+  button.submit, button.download {
+    width: 100%;
+  }
+}
