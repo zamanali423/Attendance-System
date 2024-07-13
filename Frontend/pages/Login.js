@@ -1,9 +1,11 @@
 import React, { useContext, useState } from "react";
-import { Link } from "react-router-dom";
-import { userContext } from "../context/userContext.js/userContext";
+import { Link, useNavigate } from "react-router-dom";
+import { userContext } from "../context/userContext/userContext";
+import { toast } from "react-toastify";
 
 const Login = () => {
-  const {loginData,setloginData}=useContext(userContext)
+  const { setToken } = useContext(userContext);
+  const navigate = useNavigate();
   const [inputData, setinputData] = useState({
     email: "",
     password: "",
@@ -18,16 +20,38 @@ const Login = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const fetchData = await fetch("http://localhost:3001/Login/User", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(inputData),
-    });
-    const data = await fetchData.json();
-    setloginData(data)
-    console.log("login data",loginData.user);
+
+    try {
+      const fetchData = await fetch("http://localhost:3001/Login/User", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(inputData),
+      });
+
+      const data = await fetchData.json();
+
+      if (!fetchData.ok) {
+        toast.error(data.error || "Login failed");
+        return; // Early exit if login fails
+      }
+
+      if (!data.user || !data.user.tokens || data.user.tokens.length === 0) {
+        toast.error("Token not found in response");
+        console.error("Token not found in response", data);
+        return; // Early exit if token is missing
+      }
+
+      const token = data.user.tokens[0].token;
+      setToken(token);
+      localStorage.setItem("token", token);
+      navigate("/");
+      toast.success("Login successful");
+    } catch (error) {
+      toast.error(error.message || "Login failed");
+      console.error("Login failed", error);
+    }
   };
   return (
     <>
@@ -70,7 +94,7 @@ const Login = () => {
                 onChange={handleInput}
               />
             </div>
-           
+
             <div className="pass">
               <Link href="#">Forgot password?</Link>
             </div>
