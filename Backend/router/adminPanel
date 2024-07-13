@@ -1,0 +1,95 @@
+const express = require("express");
+const router = express.Router();
+const User = require("../../database/users/Users");
+const Student = require("../../database/students/Students");
+
+router.get("/getStudents", async (req, res) => {
+  try {
+    const student = await Student.find();
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+    return res.status(200).json(student);
+  } catch (error) {
+    return res.status(500).json({ error: `Internal server error ${error}` });
+  }
+});
+
+//! Update Student Data
+router.put("/updateStudentsData/:id", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    const student = await Student.findOneAndUpdate(
+      { _id: id },
+      { status },
+      { new: true }
+    );
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+    return res.status(200).json(student);
+  } catch (error) {
+    return res.status(500).json({ error: `Internal server error ${error}` });
+  }
+});
+
+//! Count student data
+router.get("/countStudent/:email", async (req, res) => {
+  const { email } = req.params;
+  try {
+    const students = await Student.find({ email });
+    if (students.length === 0) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    let presentCount = 0;
+    let absentCount = 0;
+    let leaveCount = 0;
+
+    students.forEach((student) => {
+      if (student.status === "P" || student.status === "p") {
+        presentCount++;
+      } else if (student.status === "A" || student.status === "a") {
+        absentCount++;
+      } else if (student.request !== null) {
+        leaveCount++;
+      }
+    });
+
+    const counts = {
+      present: presentCount,
+      absent: absentCount,
+      leaves: leaveCount,
+    };
+
+    return res.status(200).json(counts);
+  } catch (error) {
+    return res.status(500).json({ error: "Internal Server Error", error });
+  }
+});
+
+//! Generate Attendance Report
+router.get('/generateReport', async (req, res) => {
+    const { from, to } = req.query;
+  
+    try {
+      const attendances = await Student.find({
+        date: {
+          $gte: new Date(from),
+          $lte: new Date(to)
+        }
+      });
+  
+      if (!attendances || attendances.length === 0) {
+        return res.status(404).json({ error: 'No attendance records found for the specified date range' });
+      }
+  
+      return res.status(200).json(attendances);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+module.exports = router;
