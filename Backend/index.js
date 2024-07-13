@@ -8,7 +8,13 @@ const app = express();
 const userRouter = require("./router/userRouter/userRouter");
 const adminRouter = require("./router/userRouter/adminPanel");
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://deploy-mern-1whq.vercel.app"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use("/", userRouter);
