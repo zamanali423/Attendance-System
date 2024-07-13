@@ -9,11 +9,7 @@ const userRouter = require("./router/userRouter/userRouter");
 const adminRouter = require("./router/userRouter/adminPanel");
 
 app.use(
-  cors({
-    origin: ["https://attendance-system-pied-seven.vercel.app"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
+  cors()
 );
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
