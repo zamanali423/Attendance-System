@@ -1,7 +1,11 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { userContext } from "../context/userContext/userContext";
 
 const Signup = () => {
+  const { setToken, image, setImage } = useContext(userContext);
+  const navigate = useNavigate();
   const [inputData, setinputData] = useState({
     fullName: "",
     email: "",
@@ -16,18 +20,45 @@ const Signup = () => {
       [e.target.name]: e.target.value,
     });
   };
+
+  //! submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const fetchData = await fetch("http://localhost:3001/register/newUser", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(inputData ),
-    });
-    const data = await fetchData.json();
-    console.log(data);
+    try {
+      const fetchData = await fetch("http://localhost:3001/register/newUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...inputData, profilePicture: image }),
+      });
+      const data = await fetchData.json();
+
+      if (!fetchData.ok) {
+        toast.error(data.error || "Registration failed");
+      }
+
+      if (!data.user || !data.user.tokens || data.user.tokens.length === 0) {
+        console.error("Token not found in response");
+      }
+
+      const token = data.user.tokens[0].token;
+      setToken(token);
+      localStorage.setItem("token", token);
+      navigate("/");
+      toast.success(data.error);
+    } catch (error) {
+      console.error(error.message || "Registration failed");
+    }
   };
+
+  function convertToBase64(e) {
+    var reader = new FileReader();
+    reader.readAsDataURL(e.target.files[0]);
+    reader.onload = () => {
+      setImage(reader.result);
+    };
+  }
   return (
     <div className="big">
       <div className="wrapper1">
@@ -76,16 +107,21 @@ const Signup = () => {
           <div className="input-box">
             <input
               type="text"
-              placeholder="Your Role Admin or User"
+              placeholder="Your Role Admin or Student"
               required
               name="role"
               value={inputData.role}
               onChange={handleInput}
             />
           </div>
-          <div className="policy">
-            <input type="checkbox" />
-            <h3>I accept all terms & condition</h3>
+          <div className="input-box">
+            <input
+              type="file"
+              className="form-control"
+              id="inputGroupFile02"
+              accept="image/*"
+              onChange={convertToBase64}
+            />
           </div>
           <div className="input-box button">
             <input type="Submit" value="Register Now" />
